@@ -1,22 +1,69 @@
 @import "tailwindcss";
-@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/ocean.css";
 @import "fumadocs-ui/css/preset.css";
 @import "fumadocs-openapi/css/preset.css";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0b0b0c; /* very dark gray */
+  --foreground: #e7e7e7;
 }
 
 @theme inline {
+  /* --- Base app tokens you already have --- */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  /* ========= Dashboard color scales (for bg-dashboard-red-700 etc.) ========= */
+  /* Reds (accent) */
+  --color-dashboard-red-700: #db0011; /* primary accent */
+  --color-dashboard-red-600: #f21f2a; /* accent hover */
+
+  /* Emeralds (success) */
+  --color-dashboard-emerald-400: #37d67f;
+
+  /* Zinc-like greys (surfaces, text, borders) */
+  --color-dashboard-zinc-950: #0f0f14;
+  --color-dashboard-zinc-900: #18181b;
+  --color-dashboard-zinc-800: #27272a;
+  --color-dashboard-zinc-750: #2a2a2a;
+  --color-dashboard-zinc-700: #3f3f46;
+  --color-dashboard-zinc-600: #5a5a64;
+  --color-dashboard-zinc-400: #b2b2bf;
+  --color-dashboard-zinc-300: #c3c3cf;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-sf-mono: var(--font-sf-mono);
+}
+
+/* Force dark theme for the landing */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0b0b0c;
+    --foreground: #e7e7e7;
+  }
 }
 
 body {
-  background: var(--background);
+  background: var(--color-dashboard-zinc-900);
+
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family:
+    var(--font-geist-sans),
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    "Apple Color Emoji",
+    "Segoe UI Emoji";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  overflow-y: auto; /* normal scrolling */
+  scrollbar-gutter: stable; /* keep the gutter reserved */
+  /* or: scrollbar-gutter: stable both-edges; if you want symmetrical centering */
 }
