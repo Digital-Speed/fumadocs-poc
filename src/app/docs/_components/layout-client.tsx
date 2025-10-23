@@ -86,9 +86,9 @@ function Sidebar() {
       )}
     >
       <Link
-        href="/docs/instructions/open-banking/get-started"
+        href="/apis/open-banking/get-started"
         className={linkVariants({
-          active: pathname.startsWith("/docs/instructions"),
+          active: false,
         })}
       >
         Getting started

@@ -10,18 +10,20 @@ import {
   DocsTitle,
 } from "@/app/docs/_components/docs-page";
 
-interface InstructionsPageProps {
+interface ApiInstructionPageProps {
   params: {
-    slug?: string[];
+    api: string;
+    instruction: string;
   };
 }
 
-export default async function InstructionsPage({
+export default async function ApiInstructionPage({
   params,
-}: InstructionsPageProps) {
-  const slugSegments = params.slug ?? [];
-  const { groups, activeGroup, activeInstruction } =
-    await getApiInstructions(slugSegments);
+}: ApiInstructionPageProps) {
+  const { groups, activeGroup, activeInstruction } = await getApiInstructions([
+    params.api,
+    params.instruction,
+  ]);
 
   if (groups.length === 0) {
     notFound();
@@ -29,26 +31,20 @@ export default async function InstructionsPage({
 
   const firstAvailable = getFirstInstruction(groups);
 
-  if (!slugSegments.length || activeGroup === null) {
+  if (activeGroup === null) {
     if (firstAvailable === null) {
       notFound();
     }
 
     redirect(
-      `/docs/instructions/${firstAvailable.group.name}/${firstAvailable.instruction.slug}`,
+      `/apis/${firstAvailable.group.slug}/${firstAvailable.instruction.slug}`,
     );
-  }
-
-  if (activeGroup.instructions.length === 0) {
-    notFound();
   }
 
   if (activeInstruction === null) {
     const fallbackInstruction = activeGroup.instructions[0];
     if (fallbackInstruction) {
-      redirect(
-        `/docs/instructions/${activeGroup.name}/${fallbackInstruction.slug}`,
-      );
+      redirect(`/apis/${activeGroup.slug}/${fallbackInstruction.slug}`);
     }
 
     notFound();
@@ -60,27 +56,24 @@ export default async function InstructionsPage({
       <DocsDescription>{activeInstruction.description}</DocsDescription>
 
       <div className="flex flex-col gap-8 md:flex-row">
-        <aside className="md:w-64 md:shrink-0 space-y-4">
+        <aside className="space-y-4 md:w-64 md:shrink-0">
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-fd-muted-foreground">
-              Products
+              APIs
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
               {groups.map((group) => (
                 <Link
-                  key={group.name}
+                  key={group.slug}
                   className={[
                     "rounded-md border px-3 py-1 text-sm",
-                    group.name === activeGroup.name
+                    group.slug === activeGroup.slug
                       ? "border-fd-primary text-fd-primary"
                       : "border-fd-border text-fd-foreground/80 hover:border-fd-primary/60 hover:text-fd-primary/80",
                   ].join(" ")}
-                  href={buildInstructionPath(
-                    group.name,
-                    group.instructions[0]?.slug,
-                  )}
+                  href={`/apis/${group.slug}`}
                 >
-                  {formatGroupName(group.name)}
+                  {group.title}
                 </Link>
               ))}
             </div>
@@ -88,7 +81,7 @@ export default async function InstructionsPage({
 
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-fd-muted-foreground">
-              Instructions
+              Guides
             </p>
             <nav className="mt-2 flex flex-col gap-2">
               {activeGroup.instructions.map((instruction) => (
@@ -100,7 +93,7 @@ export default async function InstructionsPage({
                       ? "bg-fd-primary/10 text-fd-primary"
                       : "hover:bg-fd-primary/5 text-fd-foreground/80",
                   ].join(" ")}
-                  href={`/docs/instructions/${activeGroup.name}/${instruction.slug}`}
+                  href={`/apis/${activeGroup.slug}/${instruction.slug}`}
                 >
                   <span className="font-medium">{instruction.title}</span>
                   <span className="block text-xs text-fd-muted-foreground">
@@ -109,6 +102,20 @@ export default async function InstructionsPage({
                 </Link>
               ))}
             </nav>
+          </div>
+
+          <div className="rounded-lg border border-fd-border/60 bg-fd-background/60 p-4 text-xs text-fd-muted-foreground">
+            <p className="font-medium text-fd-foreground">OpenAPI spec</p>
+            <p className="mt-1 break-all">
+              <a
+                className="text-fd-primary hover:underline"
+                href={activeGroup.specUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {activeGroup.specUrl}
+              </a>
+            </p>
           </div>
         </aside>
 
@@ -128,17 +135,19 @@ export async function generateStaticParams() {
 
   return groups.flatMap((group) =>
     group.instructions.map((instruction) => ({
-      slug: [group.name, instruction.slug],
+      api: group.slug,
+      instruction: instruction.slug,
     })),
   );
 }
 
 export async function generateMetadata({
   params,
-}: InstructionsPageProps): Promise<Metadata> {
-  const { activeGroup, activeInstruction } = await getApiInstructions(
-    params.slug ?? [],
-  );
+}: ApiInstructionPageProps): Promise<Metadata> {
+  const { activeGroup, activeInstruction } = await getApiInstructions([
+    params.api,
+    params.instruction,
+  ]);
 
   if (activeGroup === null || activeInstruction === null) {
     return {
@@ -147,7 +156,7 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${activeInstruction.title} – ${formatGroupName(activeGroup.name)}`,
+    title: `${activeInstruction.title} – ${activeGroup.title}`,
     description: activeInstruction.description,
   };
 }
@@ -161,19 +170,4 @@ function getFirstInstruction(groups: ApiInstructionGroup[]) {
   }
 
   return null;
-}
-
-function buildInstructionPath(groupName: string, instructionSlug?: string) {
-  if (!instructionSlug) {
-    return `/docs/instructions/${groupName}`;
-  }
-
-  return `/docs/instructions/${groupName}/${instructionSlug}`;
-}
-
-function formatGroupName(name: string) {
-  return name
-    .split("-")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
 }
