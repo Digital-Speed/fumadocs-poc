@@ -4,12 +4,6 @@ import { cva } from "class-variance-authority";
 import { usePathname } from "fumadocs-core/framework";
 import Link from "fumadocs-core/link";
 import type * as PageTree from "fumadocs-core/page-tree";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "fumadocs-ui/components/tabs";
 import { useSearchContext } from "fumadocs-ui/contexts/search";
 import { SidebarProvider, useSidebar } from "fumadocs-ui/contexts/sidebar";
 import { TreeContextProvider, useTreeContext } from "fumadocs-ui/contexts/tree";
@@ -100,12 +94,12 @@ function Sidebar() {
       )}
     >
       <Link
-        href="/apis/open-banking/get-started"
+        href="/apis"
         className={linkVariants({
-          active: false,
+          active: pathname === "/apis",
         })}
       >
-        Getting started
+        API catalogue
       </Link>
       <div className="flex flex-col gap-1.5">{children}</div>
     </aside>

@@ -1,4 +1,3 @@
-import { resolve } from "node:path";
 import {
   CopyIcon,
   DotsHorizontalIcon,
@@ -10,17 +9,18 @@ import {
   CodeBlockTabsList,
   CodeBlockTabsTrigger,
 } from "fumadocs-ui/components/codeblock";
-import Image from "next/image";
-import { type OpenAPIV3 } from "openapi-types";
+import type { OpenAPIV3 } from "openapi-types";
 import nightOwl from "shiki/themes/night-owl.mjs";
 import { cn } from "@/lib/cn";
-import CSharpLogo from "@/public/logos/csharp.svg";
-import CurlLogo from "@/public/logos/curl.svg";
-import GoLogo from "@/public/logos/go.svg";
-import JavaLogo from "@/public/logos/java.svg";
-import JavascriptLogo from "@/public/logos/javascript.svg";
-import PythonLogo from "@/public/logos/python.svg";
 import openapiJson from "./openapi.json";
+import openapiCopyJson from "./openapi-copy.json";
+
+export const localOpenAPISpecs = {
+  petstore: openapiJson as OpenAPIV3.Document,
+  "petstore-duplicate": openapiCopyJson as OpenAPIV3.Document,
+};
+
+export type LocalOpenAPISpecId = keyof typeof localOpenAPISpecs;
 
 const languageAssets: Record<
   string,
@@ -37,18 +37,8 @@ const languageAssets: Record<
   "c#": { label: "C#", logo: "/logos/csharp.svg" },
 };
 
-const methodColors: Record<string, string> = {
-  get: "bg-emerald-500/10 text-emerald-300 border border-emerald-500/30",
-  post: "bg-sky-500/10 text-sky-300 border border-sky-500/30",
-  put: "bg-amber-500/10 text-amber-300 border border-amber-500/30",
-  delete: "bg-rose-500/10 text-rose-300 border border-rose-500/30",
-  patch: "bg-orange-500/10 text-orange-300 border border-orange-500/30",
-};
-
 export const openapi = createOpenAPI({
-  input: async () => ({
-    petstore: openapiJson as OpenAPIV3.Document,
-  }),
+  input: async () => localOpenAPISpecs,
   shikiOptions: {
     theme: nightOwl,
   },
