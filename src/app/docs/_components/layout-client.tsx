@@ -13,9 +13,14 @@ import { cn } from "@/lib/cn";
 export interface DocsLayoutClientProps {
   tree: PageTree.Root;
   children: ReactNode;
+  showSidebar?: boolean;
 }
 
-export function DocsLayoutClient({ tree, children }: DocsLayoutClientProps) {
+export function DocsLayoutClient({
+  tree,
+  children,
+  showSidebar = true,
+}: DocsLayoutClientProps) {
   return (
     <TreeContextProvider tree={tree}>
       <SidebarProvider>
@@ -35,7 +40,7 @@ export function DocsLayoutClient({ tree, children }: DocsLayoutClientProps) {
           id="nd-docs-layout"
           className="flex flex-1 flex-row bg-[radial-gradient(circle_at_top,_rgba(219,0,17,0.08),_transparent_45%),_rgba(11,11,12,0.96)] [--fd-nav-height:56px]"
         >
-          <Sidebar />
+          {showSidebar ? <Sidebar /> : null}
           {children}
         </main>
       </SidebarProvider>

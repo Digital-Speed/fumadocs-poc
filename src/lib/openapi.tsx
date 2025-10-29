@@ -22,6 +22,128 @@ export const localOpenAPISpecs = {
 
 export type LocalOpenAPISpecId = keyof typeof localOpenAPISpecs;
 
+const HTTP_METHODS = [
+  "get",
+  "put",
+  "post",
+  "delete",
+  "options",
+  "head",
+  "patch",
+  "trace",
+] as const satisfies ReadonlyArray<OpenAPIV3.HttpMethods>;
+
+export interface LocalOpenAPIOperation {
+  slug: string;
+  method: OpenAPIV3.HttpMethods;
+  path: string;
+  summary?: string;
+  description?: string;
+  tags?: string[];
+  operationId?: string;
+}
+
+export function listLocalOperations(
+  specId: LocalOpenAPISpecId,
+): LocalOpenAPIOperation[] {
+  const spec = localOpenAPISpecs[specId];
+  if (spec === undefined) return [];
+
+  const operations: LocalOpenAPIOperation[] = [];
+  const slugCounts = new Map<string, number>();
+
+  for (const [path, item] of Object.entries(spec.paths ?? {})) {
+    if (!item) continue;
+    for (const method of HTTP_METHODS) {
+      const operation = item[method];
+      if (!operation) continue;
+
+      const baseSlug = createOperationSlug(operation.operationId, method, path);
+      const slug = ensureUniqueSlug(baseSlug, slugCounts);
+
+      operations.push({
+        slug,
+        method,
+        path,
+        summary: operation.summary ?? item.summary ?? undefined,
+        description: operation.description ?? item.description ?? undefined,
+        tags: operation.tags ?? item.tags ?? undefined,
+        operationId: operation.operationId ?? undefined,
+      });
+    }
+  }
+
+  return operations.sort((a, b) => {
+    const left =
+      a.summary ?? a.operationId ?? `${a.method.toUpperCase()} ${a.path}`;
+    const right =
+      b.summary ?? b.operationId ?? `${b.method.toUpperCase()} ${b.path}`;
+    return left.localeCompare(right);
+  });
+}
+
+export function getLocalOperation(
+  specId: LocalOpenAPISpecId,
+  slug: string,
+): LocalOpenAPIOperation | undefined {
+  return listLocalOperations(specId).find(
+    (operation) => operation.slug === slug,
+  );
+}
+
+const METHOD_BADGE_CLASS_MAP: Record<string, string> = {
+  get: "border-emerald-500/40 text-emerald-300",
+  post: "border-sky-500/40 text-sky-300",
+  put: "border-amber-500/40 text-amber-300",
+  delete: "border-rose-500/40 text-rose-300",
+  patch: "border-orange-500/40 text-orange-300",
+};
+
+const DEFAULT_METHOD_BADGE_CLASS =
+  "border-dashboard-zinc-700 text-dashboard-zinc-400";
+
+export function getMethodBadgeClassName(method: string) {
+  return (
+    METHOD_BADGE_CLASS_MAP[method.toLowerCase()] ?? DEFAULT_METHOD_BADGE_CLASS
+  );
+}
+
+function createOperationSlug(
+  operationId: string | undefined,
+  method: OpenAPIV3.HttpMethods,
+  path: string,
+) {
+  if (operationId) {
+    const sanitizedOperationId = sanitizeSlug(operationId, {
+      preserveCase: true,
+    });
+    if (sanitizedOperationId.length > 0) return sanitizedOperationId;
+  }
+
+  const fallback = `${method}-${path}`;
+  return sanitizeSlug(fallback, { preserveCase: false });
+}
+
+function ensureUniqueSlug(base: string, counts: Map<string, number>) {
+  const normalized = base.length > 0 ? base : "operation";
+  const current = counts.get(normalized) ?? 0;
+  counts.set(normalized, current + 1);
+  if (current === 0) return normalized;
+  return `${normalized}-${current + 1}`;
+}
+
+function sanitizeSlug(value: string, options: { preserveCase: boolean }) {
+  const cleaned = value
+    .trim()
+    .replace(/[{}[\]]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/[^A-Za-z0-9_-]+/g, "-")
+    .replace(/-{2,}/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return options.preserveCase ? cleaned : cleaned.toLowerCase();
+}
+
 const languageAssets: Record<
   string,
   {

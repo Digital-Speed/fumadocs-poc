@@ -5,5 +5,9 @@ import { source } from "@/lib/source";
 export default function DocsLayout({ children }: { children: ReactNode }) {
   const tree = source.getPageTree();
 
-  return <DocsLayoutClient tree={tree}>{children}</DocsLayoutClient>;
+  return (
+    <DocsLayoutClient tree={tree} showSidebar={false}>
+      {children}
+    </DocsLayoutClient>
+  );
 }
