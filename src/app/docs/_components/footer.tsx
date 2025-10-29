@@ -36,9 +36,25 @@ export default function Footer() {
   }, [flatten, pathname]);
 
   return (
-    <div className="flex flex-row justify-between gap-2 items-center font-medium">
-      {previous ? <Link href={previous.url}>{previous.name}</Link> : null}
-      {next ? <Link href={next.url}>{next.name}</Link> : null}
+    <div className="flex flex-row items-center justify-between gap-2 text-sm font-medium text-dashboard-zinc-300">
+      {previous ? (
+        <Link
+          href={previous.url}
+          className="rounded-full border border-dashboard-zinc-800/60 px-4 py-2 text-dashboard-zinc-300 transition-colors hover:border-dashboard-red-600/60 hover:text-dashboard-red-600"
+        >
+          ← {previous.name}
+        </Link>
+      ) : (
+        <span />
+      )}
+      {next ? (
+        <Link
+          href={next.url}
+          className="rounded-full border border-dashboard-zinc-800/60 px-4 py-2 text-dashboard-zinc-300 transition-colors hover:border-dashboard-red-600/60 hover:text-dashboard-red-600"
+        >
+          {next.name} →
+        </Link>
+      ) : null}
     </div>
   );
 }

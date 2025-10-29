@@ -6,15 +6,21 @@ import {
 } from "@radix-ui/react-icons";
 import { createOpenAPI } from "fumadocs-openapi/server";
 import {
-  CodeBlock,
   CodeBlockTabs,
   CodeBlockTabsList,
   CodeBlockTabsTrigger,
 } from "fumadocs-ui/components/codeblock";
 import Image from "next/image";
-import { Children } from "react";
+import { type OpenAPIV3 } from "openapi-types";
 import nightOwl from "shiki/themes/night-owl.mjs";
 import { cn } from "@/lib/cn";
+import CSharpLogo from "@/public/logos/csharp.svg";
+import CurlLogo from "@/public/logos/curl.svg";
+import GoLogo from "@/public/logos/go.svg";
+import JavaLogo from "@/public/logos/java.svg";
+import JavascriptLogo from "@/public/logos/javascript.svg";
+import PythonLogo from "@/public/logos/python.svg";
+import openapiJson from "./openapi.json";
 
 const languageAssets: Record<
   string,
@@ -40,7 +46,9 @@ const methodColors: Record<string, string> = {
 };
 
 export const openapi = createOpenAPI({
-  input: [`${resolve(process.cwd(), "src/openapi.json")}`],
+  input: async () => ({
+    petstore: openapiJson as OpenAPIV3.Document,
+  }),
   shikiOptions: {
     theme: nightOwl,
   },
@@ -50,16 +58,14 @@ export const openapi = createOpenAPI({
       const defaultValue = items[0];
 
       return (
-        <div className=" border border-white  bg-[#0f131a] text-white shadow-lg">
+        <div className="border border-dashboard-zinc-800/70 bg-dashboard-zinc-950/70 text-dashboard-zinc-200 shadow-[0_30px_70px_-45px_rgba(0,0,0,0.85)] backdrop-blur">
           <CodeBlockTabs
             groupId="fumadocs_openapi_requests"
             defaultValue={defaultValue}
+            className="bg-dashboard-zinc-950/70"
           >
-            <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-3 bg-black">
-              <CodeBlockTabsList
-                color="black"
-                className="flex gap-6 overflow-x-auto bg-black"
-              >
+            <div className="rounded-none px-5 pt-4">
+              <CodeBlockTabsList className="flex items-end justify-between gap-2 border-b border-dashboard-zinc-800/70 bg-transparent">
                 {items.map((item) => {
                   const normalized = item.trim().toLowerCase();
                   const asset = languageAssets[normalized] ??
@@ -73,58 +79,51 @@ export const openapi = createOpenAPI({
                       key={item}
                       value={item}
                       className={cn(
-                        "group flex flex-col items-center gap-2 rounded-md px-1 py-2 text-xs font-medium text-white/60 transition bg-black",
-                        "data-[state=active]:text-white",
+                        "group flex flex-1 flex-col items-center gap-1 border-b-2 border-transparent py-3 text-xs font-semibold uppercase tracking-[0.18em] text-dashboard-zinc-500 transition",
+                        "hover:text-dashboard-zinc-200",
+                        "data-[state=active]:border-dashboard-red-600 data-[state=active]:text-dashboard-zinc-100",
                       )}
                     >
-                      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/5 shadow-inner ring-1 ring-white/10 transition group-data-[state=active]:bg-white/15">
-                        <Image
-                          src={asset.logo}
-                          alt={`${asset.label} logo`}
-                          fill
-                          className="h-8 w-8"
-                        />
+                      <span className="relative flex h-8 w-8 items-center justify-center overflow-hidden  border border-dashboard-zinc-800/60 bg-dashboard-zinc-900/70 text-[10px] text-dashboard-zinc-400 transition group-data-[state=active]:border-dashboard-red-600/70 group-data-[state=active]:text-dashboard-zinc-100"></span>
+                      <span className="text-[11px] font-medium tracking-normal">
+                        {asset.label}
                       </span>
-                      <span className="text-sm">{asset.label}</span>
-                      <span className="mt-1 hidden h-1 w-full rounded-full bg-red-500 group-data-[state=active]:block" />
                     </CodeBlockTabsTrigger>
                   );
                 })}
               </CodeBlockTabsList>
-              <button
-                type="button"
-                aria-label="More request options"
-                className="inline-flex h-9 w-9 items-center justify-center bg-black rounded-md border border-white/10 text-white/70 transition hover:border-white/30 hover:text-white"
-              >
-                <DotsHorizontalIcon className="size-4" />
-              </button>
             </div>
 
-            <div className="flex items-center justify-between border-b border-white/10 px-5 py-3 bg-black">
-              <span className="text-sm font-medium text-white/80">
+            <div className="flex items-center justify-between border-b border-dashboard-zinc-800/70 px-5 py-3">
+              <span className="text-sm font-medium text-dashboard-zinc-300">
                 Request samples
               </span>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   aria-label="Copy sample"
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-white/10 text-white/70 transition hover:border-white/30 hover:text-white"
+                  className="inline-flex h-8 w-8 items-center justify-center  border border-dashboard-zinc-800/60 bg-dashboard-zinc-900/70 text-dashboard-zinc-400 transition hover:border-dashboard-red-600/60 hover:text-dashboard-red-600"
                 >
                   <CopyIcon className="size-4" />
                 </button>
                 <button
                   type="button"
                   aria-label="Open sample in new window"
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-white/10 text-white/70 transition hover:border-white/30 hover:text-white"
+                  className="inline-flex h-8 w-8 items-center justify-center  border border-dashboard-zinc-800/60 bg-dashboard-zinc-900/70 text-dashboard-zinc-400 transition hover:border-dashboard-red-600/60 hover:text-dashboard-red-600"
                 >
                   <ExternalLinkIcon className="size-4" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="More request options"
+                  className="inline-flex h-8 w-8 items-center justify-center  border border-dashboard-zinc-800/60 bg-dashboard-zinc-900/70 text-dashboard-zinc-400 transition hover:border-dashboard-red-600/60 hover:text-dashboard-red-600"
+                >
+                  <DotsHorizontalIcon className="size-4" />
                 </button>
               </div>
             </div>
 
-            <div className="px-5 pb-5 pt-4 ">
-              <CodeBlock>{children}</CodeBlock>
-            </div>
+            <div className="px-5 pb-5">{children}</div>
           </CodeBlockTabs>
         </div>
       );

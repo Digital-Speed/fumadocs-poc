@@ -4,6 +4,12 @@ import { cva } from "class-variance-authority";
 import { usePathname } from "fumadocs-core/framework";
 import Link from "fumadocs-core/link";
 import type * as PageTree from "fumadocs-core/page-tree";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "fumadocs-ui/components/tabs";
 import { useSearchContext } from "fumadocs-ui/contexts/search";
 import { SidebarProvider, useSidebar } from "fumadocs-ui/contexts/sidebar";
 import { TreeContextProvider, useTreeContext } from "fumadocs-ui/contexts/tree";
@@ -19,19 +25,21 @@ export function DocsLayoutClient({ tree, children }: DocsLayoutClientProps) {
   return (
     <TreeContextProvider tree={tree}>
       <SidebarProvider>
-        <header className="sticky top-0 bg-fd-background h-14 z-20">
-          <nav className="flex flex-row items-center gap-2 size-full px-4">
-            <Link href="/" className="font-medium mr-auto">
+        <header className="sticky top-0 z-20 h-14 border-b border-dashboard-zinc-800/70 bg-dashboard-zinc-950/70 backdrop-blur">
+          <nav className="flex size-full flex-row items-center gap-3 px-6">
+            <Link
+              href="/"
+              className="mr-auto text-sm font-semibold uppercase tracking-[0.2em] text-dashboard-zinc-300 transition-colors hover:text-dashboard-red-600"
+            >
               My Docs
             </Link>
-
             <SearchToggle />
             <NavbarSidebarTrigger className="md:hidden" />
           </nav>
         </header>
         <main
           id="nd-docs-layout"
-          className="flex flex-1 flex-row [--fd-nav-height:56px]"
+          className="flex flex-1 flex-row bg-[radial-gradient(circle_at_top,_rgba(219,0,17,0.08),_transparent_45%),_rgba(11,11,12,0.96)] [--fd-nav-height:56px]"
         >
           <Sidebar />
           {children}
@@ -48,7 +56,10 @@ function SearchToggle(props: ComponentProps<"button">) {
   return (
     <button
       {...props}
-      className={cn("text-sm", props.className)}
+      className={cn(
+        "rounded-full border border-dashboard-zinc-800/60 bg-dashboard-zinc-900/60 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.16em] text-dashboard-zinc-300 transition-colors hover:border-dashboard-red-600/60 hover:text-dashboard-red-600",
+        props.className,
+      )}
       onClick={() => setOpenSearch(true)}
     >
       Search
@@ -62,7 +73,10 @@ function NavbarSidebarTrigger(props: ComponentProps<"button">) {
   return (
     <button
       {...props}
-      className={cn("text-sm", props.className)}
+      className={cn(
+        "rounded-full border border-dashboard-zinc-800/60 bg-dashboard-zinc-900/60 px-3 py-2 text-[11px] font-medium uppercase tracking-[0.16em] text-dashboard-zinc-300 transition-colors hover:border-dashboard-red-600/60 hover:text-dashboard-red-600",
+        props.className,
+      )}
       onClick={() => setOpen(!open)}
     >
       Sidebar
@@ -80,9 +94,9 @@ function Sidebar() {
   return (
     <aside
       className={cn(
-        "fixed flex flex-col shrink-0 p-4 top-14 z-20 text-sm overflow-auto md:sticky md:h-[calc(100dvh-56px)] md:w-[300px]",
-        "max-md:inset-x-0 max-md:bottom-0 max-md:bg-fd-background",
-        !open && "max-md:invisible",
+        "fixed top-16 z-20 flex shrink-0 flex-col gap-5 overflow-auto rounded-3xl border border-dashboard-zinc-800/60 bg-dashboard-zinc-950/70 p-6 text-sm shadow-[0_24px_70px_-45px_rgba(0,0,0,0.85)] backdrop-blur md:sticky md:h-[calc(100dvh-56px)] md:w-[310px]",
+        "max-md:inset-x-6 max-md:bottom-6 max-md:px-5 max-md:py-6",
+        !open && "max-md:pointer-events-none max-md:opacity-0",
       )}
     >
       <Link
@@ -93,7 +107,7 @@ function Sidebar() {
       >
         Getting started
       </Link>
-      <div className="flex flex-col">{children}</div>
+      <div className="flex flex-col gap-1.5">{children}</div>
     </aside>
   );
 }
@@ -111,12 +125,13 @@ function renderSidebarChildren(items: PageTree.Node[]) {
 }
 
 const linkVariants = cva(
-  "flex items-center gap-2 w-full py-1.5 rounded-lg text-fd-foreground/80 [&_svg]:size-4",
+  "flex w-full items-center gap-2 rounded-2xl border border-transparent px-3.5 py-2 text-dashboard-zinc-400 transition-all duration-150 [&_svg]:size-4",
   {
     variants: {
       active: {
-        true: "text-fd-primary font-medium",
-        false: "hover:text-fd-accent-foreground",
+        true: "border-dashboard-zinc-800 bg-dashboard-zinc-900/70 text-dashboard-zinc-100 shadow-[0_16px_40px_-35px_rgba(0,0,0,0.9)]",
+        false:
+          "hover:border-dashboard-zinc-800/60 hover:bg-dashboard-zinc-900/50 hover:text-dashboard-zinc-200",
       },
     },
   },
@@ -140,14 +155,14 @@ function SidebarItem({
         })}
       >
         {item.icon}
-        {item.name}
+        <span className="truncate">{item.name}</span>
       </Link>
     );
   }
 
   if (item.type === "separator") {
     return (
-      <p className="text-fd-muted-foreground mt-6 mb-2 first:mt-0">
+      <p className="mt-6 mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-dashboard-zinc-500">
         {item.icon}
         {item.name}
       </p>
@@ -155,7 +170,7 @@ function SidebarItem({
   }
 
   return (
-    <div>
+    <div className="flex flex-col gap-2">
       {item.index ? (
         <Link
           className={linkVariants({
@@ -164,15 +179,17 @@ function SidebarItem({
           href={item.index.url}
         >
           {item.index.icon}
-          {item.index.name}
+          <span className="truncate">{item.index.name}</span>
         </Link>
       ) : (
-        <p className={cn(linkVariants(), "text-start")}>
+        <p className={cn(linkVariants(), "text-start text-dashboard-zinc-400")}>
           {item.icon}
-          {item.name}
+          <span className="truncate">{item.name}</span>
         </p>
       )}
-      <div className="pl-4 border-l flex flex-col">{children}</div>
+      <div className="ml-4 border-l border-dashboard-zinc-800/60 pl-4">
+        {children}
+      </div>
     </div>
   );
 }
